@@ -1,0 +1,23 @@
+services:
+  app:
+    image: guestbook:v0.1.0
+    build: .
+    container_name: appc
+    ports: 
+      - "3000:3000"
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: dbc
+    ports:
+      - "6379:6379"
+    volumes: 
+      - db-data:/etc/data
+    
+  
+volumes:
+  db-data: {}
