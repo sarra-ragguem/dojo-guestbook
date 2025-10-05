@@ -1,5 +1,6 @@
 architecture: standalone
 replicaCount: 1
-
 auth:
   enabled: false
+podLabels:
+  app: redis

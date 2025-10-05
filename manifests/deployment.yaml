@@ -1,6 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
+metadata:
   name: dojo-deployment
 spec:
   replicas: 3
@@ -12,19 +12,45 @@ spec:
       labels:
         foo: bar
     spec:
+      affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: redis
+              topologyKey: kubernetes.io/hostname
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      anchor: zone-a
+                  topologyKey: topology.kubernetes.io/zone
       containers:
         - name: appc
-          image: sarraragguem/guestbook:v0.1.0
+          image: sarraragguem/guestbook:v0.2.0
           command: ["./binary"]
-          ports: 
+          ports:
             - containerPort: 3000
               name: http
           env:
             - name: REDIS_HOST
               value: "dojo-redis"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: 100m
+            limits:
+              memory: "256Mi"
+              cpu: 500m          
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
           readinessProbe:
             httpGet:
-              path: "/healthz"
+              path: /healthz
               port: http
           livenessProbe:
             httpGet:
