@@ -4,3 +4,4 @@ auth:
   enabled: false
 podLabels:
   app: redis
+#helm upgrade --install dojo-redis   oci://registry-1.docker.io/cloudpirates/redis   --version 0.1.0   -f helm/values/values.yaml
