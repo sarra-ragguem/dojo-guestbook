@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dojoapp
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/sarra-ragguem/dojo-guestbook.git
+      targetRevision: main          
+      path: manifests 
+    - repoURL: oci://registry-1.docker.io/cloudpirates
+      chart: redis
+      targetRevision: "0.1.0"             
+      helm:
+        releaseName: dojo-redis           
+        values: |-
+          architecture: standalone
+          replicaCount: 1
+          auth:
+            enabled: false
+          podLabels:
+            app: redis          
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dojonm            
+  syncPolicy:
+    automated:
+      prune: true                 
+      selfHeal: true              
+    syncOptions:
+    - CreateNamespace=true       

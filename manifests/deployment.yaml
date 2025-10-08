@@ -19,17 +19,17 @@ spec:
                 matchLabels:
                   app.kubernetes.io/name: redis
               topologyKey: kubernetes.io/hostname
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchLabels:
-                      anchor: zone-a
-                  topologyKey: topology.kubernetes.io/zone
+#          podAntiAffinity:
+#            preferredDuringSchedulingIgnoredDuringExecution:
+#              - weight: 100
+#                podAffinityTerm:
+ #                 labelSelector:
+  #                  matchLabels:
+   #                   anchor: zone-a
+    #              topologyKey: topology.kubernetes.io/zone
       containers:
         - name: appc
-          image: sarraragguem/guestbook:v0.2.0
+          image: sarraragguem/guestbook:v0.1.0
           command: ["./binary"]
           ports:
             - containerPort: 3000
