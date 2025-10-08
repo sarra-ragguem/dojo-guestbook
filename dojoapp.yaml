@@ -9,18 +9,15 @@ spec:
     - repoURL: https://github.com/sarra-ragguem/dojo-guestbook.git
       targetRevision: main          
       path: manifests 
-    - repoURL: oci://registry-1.docker.io/cloudpirates
+    - repoURL: https://charts.bitnami.com/bitnami
       chart: redis
-      targetRevision: "0.1.0"             
+      targetRevision: 19.4.1
       helm:
-        releaseName: dojo-redis           
+        releaseName: dojo-redis
         values: |-
           architecture: standalone
-          replicaCount: 1
           auth:
             enabled: false
-          podLabels:
-            app: redis          
   destination:
     server: https://kubernetes.default.svc
     namespace: dojonm            
