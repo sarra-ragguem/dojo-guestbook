@@ -1,0 +1,62 @@
+# monitoringapp.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoringapp
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  sources:
+    # 1) CRDs first
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: prometheus-operator-crds
+      targetRevision: "23.0.0"   # any current version is fine
+      helm:
+        releaseName: prom-crds
+
+    # 2) Full stack (Prometheus Operator, Prometheus, Grafana, etc.)
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "77.14.0"
+      helm:
+        releaseName: kube-prom
+        values: |-
+          crds:
+            enabled: false
+          prometheus-node-exporter:
+            enabled: false
+          grafana:
+            adminPassword: admin
+            service:
+              type: ClusterIP
+          prometheus:
+            service:
+              type: ClusterIP
+          alertmanager:
+            service:
+              type: ClusterIP
+          kube-state-metrics:
+            resources:
+              requests: { cpu: 50m, memory: 128Mi }
+              limits:   { cpu: 200m, memory: 256Mi }
+          prometheusOperator:
+            resources:
+              requests: { cpu: 50m, memory: 256Mi }
+              limits:   { cpu: 200m, memory: 512Mi }
+          prometheus:
+            prometheusSpec:
+              retention: 12h
+              resources:
+                requests: { cpu: 100m, memory: 512Mi }
+                limits:   { cpu: 400m, memory: 1Gi }
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true   # <- fixes the "annotations too long" CRD issue
