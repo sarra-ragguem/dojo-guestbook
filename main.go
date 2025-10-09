@@ -17,10 +17,22 @@ import (
 	"github.com/gorilla/mux"
 	negroni "github.com/urfave/negroni/v3"
 	simpleredis "github.com/xyproto/simpleredis/v2"
+
+	"github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/collectors"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
 	masterPool *simpleredis.ConnectionPool
+
+	    redisOps   = prometheus.NewCounterVec(
+        prometheus.CounterOpts{
+            Name: "dojo_redis_operations_total",
+            Help: "Count of Redis operations by type",
+        },
+        []string{"op"},
+    )
 )
 
 // ---------- helpers ----------
@@ -152,6 +164,13 @@ func BurnHandler(w http.ResponseWriter, r *http.Request) {
 // ---------- main ----------
 
 func main() {
+
+	    prometheus.MustRegister(
+        collectors.NewGoCollector(),
+        collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+        redisOps,
+    )
+
 	redisHost := os.Getenv("REDIS_HOST")
 	if redisHost == "" {
 		redisHost = "localhost"
@@ -166,6 +185,8 @@ func main() {
 	r.Path("/env").Methods("GET").HandlerFunc(EnvHandler)
 	r.Path("/healthz").Methods("GET").HandlerFunc(HealthHandler)
 	r.Path("/burn").Methods("GET").HandlerFunc(BurnHandler)
+	r.Path("/metrics").Methods("GET").Handler(promhttp.Handler())
+
 
 	n := negroni.Classic()
 	n.UseHandler(r)

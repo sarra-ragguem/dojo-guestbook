@@ -29,7 +29,7 @@ spec:
     #              topologyKey: topology.kubernetes.io/zone
       containers:
         - name: appc
-          image: sarraragguem/guestbook:v0.1.0
+          image: sarraragguem/guestbook:v0.3.0
           command: ["./binary"]
           ports:
             - containerPort: 3000

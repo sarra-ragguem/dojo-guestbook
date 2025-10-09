@@ -4,6 +4,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY ./public public
 COPY main.go ./
+RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -o ./binary ./main.go
 
 FROM alpine
