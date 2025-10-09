@@ -19,7 +19,6 @@ import (
 	simpleredis "github.com/xyproto/simpleredis/v2"
 
 	"github.com/prometheus/client_golang/prometheus"
-    "github.com/prometheus/client_golang/prometheus/collectors"
     "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -60,6 +59,8 @@ func ListRangeHandler(rw http.ResponseWriter, req *http.Request) {
 	membersJSON := HandleError(json.MarshalIndent(members, "", "  ")).([]byte)
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(membersJSON)
+	redisOps.WithLabelValues("lrange").Inc()
+
 }
 
 func ListPushHandler(rw http.ResponseWriter, req *http.Request) {
@@ -68,6 +69,8 @@ func ListPushHandler(rw http.ResponseWriter, req *http.Request) {
 	list := simpleredis.NewList(masterPool, key)
 	HandleError(nil, list.Add(value))
 	ListRangeHandler(rw, req)
+	redisOps.WithLabelValues("rpush").Inc()
+
 }
 
 func InfoHandler(rw http.ResponseWriter, req *http.Request) {
@@ -165,11 +168,7 @@ func BurnHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	    prometheus.MustRegister(
-        collectors.NewGoCollector(),
-        collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
-        redisOps,
-    )
+	prometheus.MustRegister(redisOps)
 
 	redisHost := os.Getenv("REDIS_HOST")
 	if redisHost == "" {

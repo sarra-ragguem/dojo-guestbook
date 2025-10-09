@@ -4,6 +4,7 @@ go 1.25
 
 require (
 	github.com/gorilla/mux v1.8.1
+	github.com/prometheus/client_golang v1.19.0
 	github.com/urfave/negroni/v3 v3.1.1
 	github.com/xyproto/simpleredis/v2 v2.8.1
 )
