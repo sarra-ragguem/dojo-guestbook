@@ -8,7 +8,7 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: prometheus
   sources:
     # 1) CRDs first
     - repoURL: https://prometheus-community.github.io/helm-charts
@@ -46,13 +46,32 @@ spec:
             resources:
               requests: { cpu: 50m, memory: 256Mi }
               limits:   { cpu: 200m, memory: 512Mi }
-          prometheus:
+           prometheus:
+            service:
+              type: ClusterIP
+            ingress:
+              enabled: true
+              ingressClassName: nginx
+              hosts:
+                - prometheus.vcap.me
+      
             prometheusSpec:
+              scrapeInterval: 5s
+              serviceMonitorSelector: {}
+              serviceMonitorNamespaceSelector: {}
+              podMonitorSelector: {}
+              podMonitorNamespaceSelector: {}
+              ruleSelector: {}
+              ruleNamespaceSelector: {}
+
+              serviceMonitorSelectorNilUsesHelmValues: false
+              podMonitorSelectorNilUsesHelmValues: false
+              ruleSelectorNilUsesHelmValues: false
+
               retention: 12h
               resources:
                 requests: { cpu: 100m, memory: 512Mi }
                 limits:   { cpu: 400m, memory: 1Gi }
-
   syncPolicy:
     automated:
       prune: true
